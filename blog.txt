@@ -1,0 +1,7 @@
+06/09/13
+continue with assignement 5
+remember the most common gcc options: gcc -g -Wall ass5.c -o ass5.o
+-g is necessary to keep the symbols table in the object file and then allow debugging.
+gcc debugging. howto set a breakpoint: break source.c:line
+tutorial simple de gdb: http://www.unknownroad.com/rtfm/gdbtut/gdbtoc.html
+next: I am doing btree. the talloc function is done. before going on, learn the background of the btree.
