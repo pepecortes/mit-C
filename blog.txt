@@ -5,3 +5,8 @@ remember the most common gcc options: gcc -g -Wall ass5.c -o ass5.o
 gcc debugging. howto set a breakpoint: break source.c:line
 tutorial simple de gdb: http://www.unknownroad.com/rtfm/gdbtut/gdbtoc.html
 next: I am doing btree. the talloc function is done. before going on, learn the background of the btree.
+
+07/09/13
+spent time setting github and git
+studied binary tree: see wikipedia "search binary tree"
+addnode is done. the preorder function only displays the last item: weak in recursion?
