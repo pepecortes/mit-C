@@ -192,7 +192,13 @@ void display(struct token_queue queue_postfix)
 	p_expr_token ptoken;
 	while ((ptoken = dequeue(&queue_postfix)) != NULL)
 		{
-		printf("%f", ptoken->value);
+		switch(ptoken->type)
+			{
+			case OPERAND:
+				printf("/%f", (ptoken->value).operand);
+			case OPERATOR:
+				printf("/%i", (ptoken->value).op_code);
+			}
 		}
 	printf("\n");
 	}
@@ -303,18 +309,15 @@ struct token_queue infix_to_postfix(struct token_queue * pqueue_infix) {
 	while ((ptoken = dequeue(pqueue_infix)) != NULL)
 		{
 		if (ptoken->type == OPERAND) //if token = number: add to output queue
-			{
 			enqueue(output, ptoken);
-			continue;
-			}		
-		//token = operator: process operators stack
-		while ((poperator = pop(opr_stack)) != NULL);
-
-		push(opr_stack, ptoken);
-		//pop remaining operators
-		while ((poperator = pop(opr_stack)) != NULL)
-			enqueue(output, poperator);
-
+		else //token = operator: process operators stack
+			{
+			while ((poperator = pop(opr_stack)) != NULL);
+			push(opr_stack, ptoken);
+			//pop remaining operators
+			while ((poperator = pop(opr_stack)) != NULL)
+				enqueue(output, poperator);
+			}
 		}
 	return *output;
 }

@@ -192,7 +192,13 @@ void display(struct token_queue queue_postfix)
 	p_expr_token ptoken;
 	while ((ptoken = dequeue(&queue_postfix)) != NULL)
 		{
-		printf("%f", ptoken->value);
+		switch(ptoken->type)
+			{
+			case OPERAND:
+				printf("/%f", (ptoken->value).operand);
+			case OPERATOR:
+				printf("/%i", (ptoken->value).op_code);
+			}
 		}
 	printf("\n");
 	}
