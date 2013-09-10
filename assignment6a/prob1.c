@@ -102,7 +102,7 @@ int main(void) {
 	unsigned int len;
 
 	do {
-		printf("Enter an expression to evaluate: ");
+		printf("Enter an expression to evaluate (SPC between elements): ");
 		fflush(stdout);
 		if (!fgets(input, INPUT_MAX, stdin))
 			abort(); /* failed to read stdin */
@@ -187,6 +187,16 @@ p_expr_token new_token(const enum token_type type, const union token_value value
 	return ptoken;
 }
 
+void display(struct token_queue queue_postfix)
+	{
+	p_expr_token ptoken;
+	while ((ptoken = dequeue(&queue_postfix)) != NULL)
+		{
+		printf("%f", ptoken->value);
+		}
+	printf("\n");
+	}
+
 /* handles evaluation process (calls above functions) for expression string str */
 /* returns the final answer */
 double evaluate(const char * str) {
@@ -204,7 +214,7 @@ double evaluate(const char * str) {
 	queue_postfix = infix_to_postfix(&queue_infix);
 	
 	//FOR TESTING
-	//display(queue_postfix);
+	display(queue_postfix);
 	ans = 99;
 
 	/* get answer from postfix-ordered queue */
@@ -285,32 +295,31 @@ struct token_queue infix_to_postfix(struct token_queue * pqueue_infix) {
 	/* TODO: construct postfix-ordered queue from infix-ordered queue;
 	   all tokens from infix queue should be added to postfix queue or freed */
 	struct token_queue *output;
-	p_expr_token *current_token;
+	p_expr_token ptoken, poperator, *opr_stack; //note that opr_stack is pointer
+	
 	output = (struct token_queue*)malloc(sizeof(struct token_queue*));
-	do
+	opr_stack = (p_expr_token*)malloc(sizeof(p_expr_token*));
+	
+	while ((ptoken = dequeue(pqueue_infix)) != NULL)
 		{
-		current_token = dequeue(pqueue_infix); //dequeue token from input
-		//printf("%i", (*current_token->type == OPERAND));
-		if ((*current_token)->type == OPERAND)
-			{printf("ca passe");
-			enqueue(output, *current_token);}
-/*
-	//if token = number: add to output queue
-	//if token = operator (o1)
-		//while there is o2 at the top of the stack
-			//and either o1 is left-assoc and its precedence is equal to
-			//that of o2 OR o1 precedence is less than o2
-			//then pop o2 off the stack onto the output queue
-		//push o1 onto the stack
-	//when not more tokens left
-		//while still tokens in the stack
-			//pop operator onto the output queue
-	//fin
-*/
+		if (ptoken->type == OPERAND) //if token = number: add to output queue
+			{
+			enqueue(output, ptoken);
+			continue;
+			}		
+		//token = operator: process operators stack
+		while ((poperator = pop(opr_stack)) != NULL);
+
+		push(opr_stack, ptoken);
+		//pop remaining operators
+		while ((poperator = pop(opr_stack)) != NULL)
+			enqueue(output, poperator);
+
 		}
-	while(current_token != NULL);
 	return *output;
 }
+
+
 
 /* evalutes the postfix expression stored in the queue */
 /* postcondition: returned value is final answer, and pqueue_postfix should be empty */
