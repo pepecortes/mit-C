@@ -34,3 +34,6 @@ the rest of the exercise is straight forward.
 
 started with assignment 6a. infix_to_postfix function. does not work because not understanding  p_expr_token (pointer or what?)
 note that i have modified evaluate to be able to test my function, but the display function is not yet created: what a bordel!
+
+11/09/13
+I did not learn anything particular about C except how difficult it is to find your way through the code. infix_to_postfix looks completed, but the output displays more 0's than expected on the postfix (perhaps of the legacy code dealing with spaces: I left this for another occasion)

@@ -312,16 +312,22 @@ struct token_queue infix_to_postfix(struct token_queue * pqueue_infix) {
 			enqueue(output, ptoken);
 		else //token = operator: process operators stack
 			{
-			while ((poperator = pop(opr_stack)) != NULL);
-			push(opr_stack, ptoken);
-			//pop remaining operators
+			int this, top;
+			this = (ptoken->value).op_code;
 			while ((poperator = pop(opr_stack)) != NULL)
-				enqueue(output, poperator);
+				{
+				top = (poperator->value).op_code;
+				if ((op_precedences[top] > op_precedences[this]) | ((op_precedences[top] == op_precedences[this]) & (op_associativity[top] == LEFT)))
+					enqueue(output, poperator);
+				}
+			push(opr_stack, ptoken);
 			}
 		}
+		//pop remaining operators
+		while ((poperator = pop(opr_stack)) != NULL)
+			enqueue(output, poperator);	
 	return *output;
 }
-
 
 
 /* evalutes the postfix expression stored in the queue */
