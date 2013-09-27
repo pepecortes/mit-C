@@ -55,22 +55,31 @@ unsigned long hashstring(const char* str)
   @desc     returns a pointer to the word or creates
             it if required
 */
-struct wordrec*  lookup(const char* str,int create)
-{
+
+struct wordrec* lookup(const char* str, int create){
+  unsigned long hash=hashstring(str);/*starting point*/
   struct wordrec* wp=table[hash];
   struct wordrec* curr=NULL;
-  unsigned long hash=hashstring(str);/*starting point*/
+  
   /*TODO: write code to
   follow the linked list to find str
   if found return pointer*/
-
-  /*if not found and create specified*/
-   if(create)
+  //do
     {
-      /*TODO:write code to  
-       create new node
-      update linked list*/
+    //curr = wp;
+    //if (curr->word == str)
+      //{
+        //return curr;
+      //}
     }
+  //while((wp = wp->next) != NULL);
+
+  ///*if not found and create specified*/
+   //if(create){
+      ///*TODO:write code to create new node and update linked list*/
+      //curr->next = walloc(str);
+      //curr = curr->next;
+    //}
   return curr;
 }
 
@@ -93,31 +102,32 @@ int main(int argc,char* argv[])
   char  word[1024]; /*big enough*/
   struct wordrec* wp=NULL;
   int i=0;
+  memset(table,0,sizeof(table)); /*fill table with 0's. strange way
+									//to initialize table!*/
+  ///*read from input*/
 
-  memset(table,0,sizeof(table));
-  /*read from input*/
   while(1)
   {
     if(fscanf(fp,"%s",word)!=1)
       break;
     wp=lookup(word,1); /*create if doesn't exist*/
-    wp->count++;
+    //wp->count++;
   }
   fclose(fp);
 
-  /*
-    print all words have frequency>100
-   */
-  for(i=0;i<MAX_BUCKETS;i++)
-    {
-      for(wp=table[i];wp!=NULL;wp=wp->next)
-	{
-	  if(wp->count>1000)
-	    {
-	      printf("%s-->%ld\n",wp->word,wp->count);
-	    }
-	}
-    }
-  cleartable();
+  ///*
+    //print all words have frequency>100
+   //*/
+  //for(i=0;i<MAX_BUCKETS;i++)
+    //{
+      //for(wp=table[i];wp!=NULL;wp=wp->next)
+	//{
+	  //if(wp->count>1000)
+	    //{
+	      //printf("%s-->%ld\n",wp->word,wp->count);
+	    //}
+	//}
+    //}
+  //cleartable();
   return 0;
 }
