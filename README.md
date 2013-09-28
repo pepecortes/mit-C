@@ -46,3 +46,7 @@ Assignment 6b (pointers to functions) is finished. Next: hashes
 
 27/09/13
 Hashes. Seg fault during the first try of the lookup function. Troubleshoot
+Pointers, pointers: the origin of all C seg fault.
+Interesting: the calls to free the memory loop through all the linked list and free the pointers AND wp->word. Perhaps because word was create by duplicating a string (which is probably a hidden call to malloc?)
+
+

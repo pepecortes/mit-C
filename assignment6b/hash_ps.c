@@ -59,28 +59,30 @@ unsigned long hashstring(const char* str)
 struct wordrec* lookup(const char* str, int create){
   unsigned long hash=hashstring(str);/*starting point*/
   struct wordrec* wp=table[hash];
-  struct wordrec* curr=NULL;
+  struct wordrec* father = NULL;
   
   /*TODO: write code to
   follow the linked list to find str
   if found return pointer*/
-  //do
-    {
-    //curr = wp;
-    //if (curr->word == str)
-      //{
-        //return curr;
-      //}
-    }
-  //while((wp = wp->next) != NULL);
-
-  ///*if not found and create specified*/
-   //if(create){
-      ///*TODO:write code to create new node and update linked list*/
-      //curr->next = walloc(str);
-      //curr = curr->next;
-    //}
-  return curr;
+  
+  //if first element is NULL just create it and return
+  if (table[hash] == NULL){
+		table[hash] = walloc(str);
+		return table[hash];
+	}
+	//browse each node of the linked list: find str
+  while (wp != NULL){
+		if (strcmp(wp->word, str) == 0){
+			return wp;
+		}
+		father = wp;
+		wp = wp->next;
+	}
+  //if not found create specified
+	if(create){
+		father->next = walloc(str);
+	}
+  return father->next;
 }
 
 /*
@@ -91,9 +93,16 @@ void cleartable()
 {
   struct wordrec* wp=NULL,*p=NULL;
   int i=0;
-  /*TODO: write code to
-    reclaim memory 
-  */
+  
+  for(i=0;i<MAX_BUCKETS;i++){
+		wp = table[i];
+		while (wp != NULL){
+			p = wp->next;
+			free(wp->word);
+			free(wp);
+			wp = p;
+		}
+  }
 }
 
 int main(int argc,char* argv[])
@@ -111,23 +120,20 @@ int main(int argc,char* argv[])
     if(fscanf(fp,"%s",word)!=1)
       break;
     wp=lookup(word,1); /*create if doesn't exist*/
-    //wp->count++;
+    wp->count++;
   }
   fclose(fp);
 
-  ///*
-    //print all words have frequency>100
-   //*/
-  //for(i=0;i<MAX_BUCKETS;i++)
-    //{
-      //for(wp=table[i];wp!=NULL;wp=wp->next)
-	//{
-	  //if(wp->count>1000)
-	    //{
-	      //printf("%s-->%ld\n",wp->word,wp->count);
-	    //}
-	//}
-    //}
+  /*
+    print all words have frequency>1000
+  */
+  for(i=0;i<MAX_BUCKETS;i++){
+		for(wp=table[i];wp!=NULL;wp=wp->next){
+			if(wp->count>1000){
+	      printf("%s-->%ld\n",wp->word,wp->count);
+	    }
+		}
+  }
   //cleartable();
   return 0;
 }
