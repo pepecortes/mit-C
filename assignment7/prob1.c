@@ -134,7 +134,7 @@ int find_index(nodekey key, p_tnode pnode) {
  * possibly creating a new root node in the process
  * should be no need to modify this function
  */
-void split_node(p_tnode * ppnode, int * poffset) {
+ void split_node(p_tnode * ppnode, int * poffset) {
 	p_tnode pnode = *ppnode;
 	int median = pnode->nkeys>>1, i;
 	p_tnode parent = pnode->parent, split = alloc_tnode();
@@ -326,19 +326,21 @@ int store_result(void * pextra, int nfields, char ** arrvalues, char ** arrfield
 }
 
 int main(int argc, char * argv[]) {
+	char *dbname = "movies.db";
 	sqlite3 *db;       // Declare pointer to sqlite database structure
 	char *zErrMsg = 0;
 	const char sql[] = "SELECT * FROM movies";
-	if (argc < 2) {
-		fprintf(stderr,"Error: database name not specified!\n");
-		return 1;
-	}
-	int rc = sqlite3_open(argv[1], &db);
+	//if (argc < 2) {
+		//fprintf(stderr,"Error: database name not specified!\n");
+		//return 1;
+	//}
+	int rc = sqlite3_open(dbname, &db);
 	if(rc){
 		printf("error: %s", sqlite3_errmsg(db));
 		sqlite3_close(db);
 		exit(1);
 	}
+	ptreeroot = alloc_tnode();
 	rc = sqlite3_exec(db,sql, store_result, 0, &zErrMsg);
 	//if(rc != SQLITE_OK){
 		//printf("SQL error: %s", zErrMsg);
