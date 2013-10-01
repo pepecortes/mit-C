@@ -119,15 +119,23 @@ int key_compare(const nodekey key1, const nodekey key2) {
  */
 int find_index(nodekey key, p_tnode pnode) {
 	/* find in between */
-	int icmp, L = 0, R = pnode->nkeys-1, M;
-	int ibetween = 0; /* index to return */
+	int icmp, L = 0, R = pnode->nkeys-1;//, M;
+	//int ibetween = 0; /* index to return */
 
 	/* TODO: complete binary search;
 	 * use key_compare() to compare two keys. */
 	while (L <= R) {
-
+		icmp = key_compare(key, pnode->keys[L]);
+		//icmp<0: key is before than pnode->...
+		if (icmp == 0){
+			return -(L+1);
+		}else if (icmp<0){
+			return L;
+		}else{
+			L++;
+		}
 	}
-	return ibetween;
+	return L;
 }
 
 /* split_node() - splits a full node in the B-tree into two separate nodes,
@@ -236,7 +244,8 @@ nodevalue * add_element(nodekey key, nodevalue * pvalue) {
 	pleaf->keys[ichild] = key;
 	pleaf->values[ichild] = pvalue;
 	pleaf->nkeys++;
-
+	
+	printf("adding element: %s\n", key);
 	return NULL;
 }
 
