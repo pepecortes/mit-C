@@ -55,3 +55,10 @@ In order to build you need to link the library sqlite3: add "-lsqlite3" to the g
 use geany for another different project)
 a) is completed. I have started b): you have to complete several functions ("find_value"
 is the first called by "store_result"
+
+2/10/2013
+End of coding part of ass7. Started with the creation of libraries
+I have opted for a static library.
+I have found a web page that summarizes the process (see pdf)
+After following all the steps, I have a large number of cryptic errors.
+It is quite impressive the time it takes in C to do pretty straight forward things...

@@ -339,48 +339,56 @@ int store_result(void * pextra, int nfields, char ** arrvalues, char ** arrfield
 	return 0;
 }
 
-int main(int argc, char * argv[]) {
-	char *dbname = "movies.db";
-	sqlite3 *db;       // Declare pointer to sqlite database structure
-	char *zErrMsg = 0;
+int initialize_db (const char * filename) {
 	const char sql[] = "SELECT * FROM movies";
-	char *buffer = NULL;
-	int read;
-	unsigned int len;
-	nodevalue *foundNode = NULL; //used when querying the B-tree
-	//if (argc < 2) {
-		//fprintf(stderr,"Error: database name not specified!\n");
-		//return 1;
-	//}
-	int rc = sqlite3_open(dbname, &db);
-	if(rc){
-		printf("error: %s", sqlite3_errmsg(db));
-		sqlite3_close(db);
-		exit(1);
-	}
+	sqlite3 * pDb = NULL;
+	int nresult, ret = 0;
+
 	ptreeroot = alloc_tnode();
-	rc = sqlite3_exec(db,sql, store_result, 0, &zErrMsg);
-	if(rc != SQLITE_OK){
-		printf("SQL error: %s", zErrMsg);
-		sqlite3_free(zErrMsg);
-	}
-	sqlite3_close(db); //close when finished
-	
-	while (1){
-		printf("\nquery film? ");
-		read = getline(&buffer, &len, stdin);
-		if (read == 1){
-			break; //no input: escape
+
+	if ( (nresult = sqlite3_open(filename,&pDb)) != SQLITE_OK) {
+		fprintf(stderr,"Error: the database could not be opened. %s (%d)\n", sqlite3_errmsg(pDb), nresult);
+		ret = 1;
+	} else {
+		char * errmsg = NULL;
+
+		nresult = sqlite3_exec(pDb, sql, store_result, NULL, &errmsg);
+
+		if (errmsg) {
+			fprintf(stderr, "Error executing SQL query: %s.\n", errmsg);
+			sqlite3_free(errmsg);
+			ret = 2;
 		}
-		buffer[strlen(buffer)-1] = 0; //remove trailing newline
-		foundNode = find_value(buffer);
-		if (foundNode != NULL){
-			display_record(foundNode, stdout);
-		}else{
-			printf("not found");
-		}
+
 	}
-	
-	return 0;
+
+	sqlite3_close(pDb);
+
+	return ret;
 }
 
+int locate_movie(char * title ) {
+	struct s_record * pvalue;
+
+	pvalue = find_value(title);
+	if (pvalue != NULL) {
+		printf("Found: ");
+		display_record(pvalue, stdout);
+	}
+	return pvalue != NULL;
+}
+
+void dump_sorted_list(const char * filename) {
+	FILE * fp = fopen(filename, "w");
+	if (fp != NULL) {
+		inorder_traversal(ptreeroot, fp);
+		fclose(fp);
+	}
+}
+
+void cleanup(void) {
+	if (ptreeroot) {
+		free_tnode(ptreeroot);
+		ptreeroot = NULL;
+	}
+}
