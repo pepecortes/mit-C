@@ -62,3 +62,12 @@ I have opted for a static library.
 I have found a web page that summarizes the process (see pdf)
 After following all the steps, I have a large number of cryptic errors.
 It is quite impressive the time it takes in C to do pretty straight forward things...
+
+3/10/13
+Ended the creation of the library. The pdf is helpful. I found the origin of the cryptic
+errors: I tried to link "static" against both "libprob1.a" and "sqlite3" (by setting the
+command line option -static). It looks obvious that sqlite3 is not meant to be linked
+statically. Solution: remove the "-static" option but, attention: you link statically
+against libprob1.a by removing "-lprob1" and giving libprob1.a instead:
+"gcc -Wall prob1d.c -L. libprob1.a -lsqlite3 -o prob1d"
+
