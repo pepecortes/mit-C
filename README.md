@@ -71,3 +71,7 @@ statically. Solution: remove the "-static" option but, attention: you link stati
 against libprob1.a by removing "-lprob1" and giving libprob1.a instead:
 "gcc -Wall prob1d.c -L. libprob1.a -lsqlite3 -o prob1d"
 
+5/10/13
+Started with Lab2. It looks easier than previous exercices. Perhaps I am getting
+used to C?
+Left in PART B.
