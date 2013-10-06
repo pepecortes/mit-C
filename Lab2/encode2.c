@@ -3,7 +3,7 @@
 #include <string.h>
 
 #define MAX_SYMBOLS 255
-#define MAX_LEN     7
+#define MAX_LEN     9
 
 struct tnode
 {
@@ -16,12 +16,20 @@ struct tnode
     char     symbol;
 };
 
+struct freqnode{ //store characters and their frequencies
+		char symbol;
+		unsigned int count;
+		float freq;
+		struct freqnode* next;
+};
 
 /*global variables*/
 char code[MAX_SYMBOLS][MAX_LEN];
 struct tnode* root=NULL; /*tree of symbols*/
 struct tnode* qhead=NULL; /*list of current symbols*/
 struct cnode* chead=NULL;/*list of code*/
+struct freqnode* fhead = NULL; /*list of frequencies*/
+int NCHAR = 0; /*number of characters/nodes*/
 
 /*
     @function   talloc
@@ -36,6 +44,21 @@ struct tnode* talloc(int symbol,float freq)
         p->symbol=symbol;
         p->freq=freq;
 		p->isleaf=1;
+    }
+    return p;
+}
+
+/*
+    @function   falloc
+    @desc       allocates new freqnode 
+*/
+struct freqnode* falloc(char c){
+    struct freqnode* p = (struct freqnode*)malloc(sizeof(struct freqnode));
+    if(p != NULL){
+				p->symbol = c;
+        p->next = NULL;
+        p->count = 0;
+        p->freq = 0;
     }
     return p;
 }
@@ -170,74 +193,121 @@ void encode(char* str,FILE* fout)
 		str++;
 	}
 }
+
+
+/*
+ * 
+ * name: search frequency node
+ * @param character to lookup, head of freqnode list
+ * @return the found node. create if does not exist
+ * 
+ */
+struct freqnode* search_freqnode(char c, struct freqnode *head){
+	
+		struct freqnode *curr = head;
+		struct freqnode *prev = NULL;
+		
+		while (curr != NULL){
+				if (curr->symbol == c){
+						return curr;
+				}
+				prev = curr;
+				curr = curr->next;
+		}
+		//not found: create
+		prev->next = falloc(c);
+		return prev->next;
+}
+
+/*
+ * 
+ * name: count frequencies
+ * @desc ouputs number of different characters and their frequencies
+ * @return pointer to root freqnode 
+ * 
+ */
+struct freqnode* count_freq(char *file){
+    /*
+    example:
+    float freq[]={0.01,0.04,0.05,0.11,0.19,0.20,0.4};
+		int   NCHAR=7; //number of characters
+    */
+    char c = 0;
+    unsigned int count_char = 0;
+    struct freqnode *head = NULL;
+    struct freqnode *pnode = NULL;
+    
+    head = falloc('a'); //create the list. first item is an 'a'
+		FILE* fp=fopen(file,"r");
+		while ((c = (char)fgetc(fp)) != EOF){ //browse the file
+				pnode = search_freqnode(c, head); //create if does not exist
+				pnode->count++;
+				count_char++;
+		}
+		fclose(fp);
+		
+		/* compute frequencies */
+		pnode = head;
+		do {
+			pnode->freq = (float)pnode->count / count_char;
+		} while ((pnode = pnode->next) != NULL);
+		
+		return head;
+}
+
 /*
     @function main
 */
 int main()
 {
-    /*test pq*/
     struct tnode* p=NULL;
-    struct tnode* lc,*rc;
-    float freq[]={0.01,0.04,0.05,0.11,0.19,0.20,0.4};
-	int   NCHAR=7; /*number of characters*/
+    struct tnode *lc, *rc;
+    struct freqnode *fcurr;
     int i=0;
-	const char *CODE_FILE="code.txt";
-	const char *OUT_FILE="encoded.txt";
-	FILE* fout=NULL;
-	/*zero out code*/
-	memset(code,0,sizeof(code));
-
-/*
-	//testing queue insert and pop
-    pq_insert(talloc('a',0.1));
-    pq_insert(talloc('b',0.2));
-    pq_insert(talloc('c',0.15));
-	puts("making sure it pops in the right order");
-	while((p=pq_pop())){
-        free(p);
-    }
-	exit(0);
-*/
-
-	qhead=NULL;
+		const char *CODE_FILE="code.txt";
+		const char *OUT_FILE="encoded.txt";
+		char *IN_FILE = "book.txt";
+		FILE* fout=NULL;
+		
+		memset(code,0,sizeof(code)); //zero out code
+		qhead=NULL;
+		fhead = count_freq(IN_FILE); //read characters and count frequencies
+		
     /*initialize with freq*/
-    for(i=0;i<NCHAR;i++){
-        pq_insert(talloc('a'+i,freq[i]));
-    }
+    fcurr = fhead;
+		while (fcurr != NULL){
+				pq_insert(talloc(fcurr->symbol, fcurr->freq));
+				NCHAR++;
+				fcurr = fcurr->next;
+		}
+    
     /*build tree*/
-    for(i=0;i<NCHAR-1;i++)
-    {
+    i = 0;
+    for(i=0; i<NCHAR-1; i++){
+				printf("Iteration: %i\n", i);
         lc=pq_pop();
         rc=pq_pop();
-        /*create parent*/
         p=talloc(0,lc->freq+rc->freq);
-        /*set parent link*/
         lc->parent=rc->parent=p;
-        /*set child link*/
         p->right=rc; p->left=lc;
-		/*make it non-leaf*/
-		p->isleaf=0;
-        /*add the new node to the queue*/
+				p->isleaf=0;
         pq_insert(p);
     }
-    /*get root*/
-    root=pq_pop();
-	/*build code*/
-	generate_code(root,0);
-	/*output code*/
-	puts("code:");
-	fout=fopen(CODE_FILE,"w");
-	dump_code(stdout);
-	dump_code(fout);
-	fclose(fout);
+    root=pq_pop(); //get root
+    generate_code(root,0); //build code
+		puts("code:");//output code
+		fout=fopen(CODE_FILE,"w");
+		dump_code(stdout);
+		dump_code(fout);
+		fclose(fout);
 
-	/*encode a sample string*/
-	puts("orginal:abba cafe bad");
-	fout=fopen(OUT_FILE,"w");
-	encode("abba cafe bad",stdout);
-	encode("abba cafe bad",fout);
-	fclose(fout);
-	getchar();
-	/*TODO: clear resources*/
+	///*encode a sample string*/
+	//puts("orginal:abba cafe bad");
+	//fout=fopen(OUT_FILE,"w");
+	//encode("abba cafe bad",stdout);
+	//encode("abba cafe bad",fout);
+	//fclose(fout);
+	//getchar();
+	///*TODO: clear resources*/
     return 0;
 }

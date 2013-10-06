@@ -75,3 +75,8 @@ against libprob1.a by removing "-lprob1" and giving libprob1.a instead:
 Started with Lab2. It looks easier than previous exercices. Perhaps I am getting
 used to C?
 Left in PART B.
+
+6/10/13
+Lab2 goes on OK.
+Segmentation fault in line 153. Debug displays symbol = -30 (obviously not a character)
+You probably have to filter out non printable characters?
